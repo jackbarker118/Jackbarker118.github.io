@@ -7,3 +7,25 @@ categories: []
 tags: []
 description: ''
 ---
+![](/post/2020-12-10-python-post_files/imagedna.jpeg)
+## In python we were able to create a function that can scan dna stands to find how many times each three ltter base code shows up in the sequence and tell you
+
+```{python}
+import re
+my_seq1 = "ATCATCATG"
+my_seq2 = "CAGCCCAATCAGGCTCTACTGCCACTAAACTTACGCAGGATATATTTACGCCGACGTACT"
+
+# Your code goes here
+def count_mers(my_seq1):
+    mers=re.findall(r'[ATGC][ATGC][ATGC]',my_seq1)
+    counts={}
+    for c in mers:
+        if c in counts:
+            counts[c]+=1
+        else:
+            counts[c]=1
+    for c in counts:
+        print(c, "appears", counts[c],"times")
+count_mers(my_seq1)
+count_mers(my_seq2)
+```
