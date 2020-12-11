@@ -1,0 +1,9 @@
+---
+title: 'Python post '
+author: ''
+date: '2020-12-10'
+slug: python-post
+categories: []
+tags: []
+description: ''
+---

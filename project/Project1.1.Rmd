@@ -1,0 +1,191 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "SDS348"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+...
+
+## Introduction
+
+I have chosen to explore two datasets containing information on comic book cahracters, specifically Marvel and DC comic characters. I started to think of datasets that could be compatible and Marvel and DC immediately came to mind. I've been a fan of marvel and have had several arguments with friends on which universe is more powerful. Now I can actually find out for myself. I found datasets on forum in kaggle a site were people post their projects for public veiwing and use. I was able to download to different datatets as cvs after creating an account with the site.  
+  One of the two datasets contains biographical infomation like race, gender, eye color, ect. This dataset this dataset contains characters from outside the Marvel or DC comic univeses so for the purposes of this project I have filtered those out. The second dataset contians the abilty statitistics of DC and Marvel comic characters. These stats include strength, durability, intelligence, speed, power and combat. I plan to explore the relationships between any of these given abilities and biographical information like race or gender. I also plan to explore some of the differences compostion and strength among the two comic universes.
+  
+  
+## Tidying
+
+```{r}
+library(tidyverse)
+chr_stats <- read_csv("~/lab/charcters_stats.csv")
+chr_bio <- read_csv("~/lab/marvel_characters_info.csv")
+head(chr_bio)
+chr_bio %>% pivot_longer(c("Height","Weight")) ->chrtidy
+head(chrtidy)
+chrtidy%>% pivot_wider(names_from = "name", values_from= "value")
+
+``` 
+
+  
+My data was already tidy so in this section here i just untidy it by pivoting heigh and weight longer where each character now had an extra row. then i pivoted them wider to fix it.
+
+## Joining
+```{r}
+chr_bio %>% filter(Publisher %in% c("Marvel Comics", "DC Comics"))->chr_bio
+inner_join(chr_bio, chr_stats, by = "Name")->full_chrdata
+full_chrdata%>% select(-Alignment.y)->full_chrdata
+full_chrdata %>% rename(Alignment= Alignment.x)->full_chrdata
+full_chrdata %>% distinct(Name, .keep_all = T) ->full_chrdata
+full_chrdata$Alignment[full_chrdata$Alignment=="-"]<-"neutral"
+full_chrdata$Gender[full_chrdata$Gender=="-"]<-"Non-gendered"
+full_chrdata$Race[full_chrdata$Race=="-"]<-"Unkown"
+full_chrdata
+```
+
+Here I performed a filter on the character bio dataset before joining becuase the set contianed characters from star wars, wildstorm, and other variuos comic and i only wanted marvel and dc comic character. then i perfomed an inner join with the stats set so it would also remove all the cases in the stats set that werent marvel or dc. the stats set did not have this distinction in it but by inner joining with the filtered bio set only character from marvel or dc would remain.both datasets also had alignment columns o i deleted one and remaned the other. there were also several duplicate name entries that needed to be removed in order to not skew the data. The datasets also had the ir NAs poses as "-". where applicable i changed those NAs into a new catagory.Where there was a "-"in gender i made it "Non-gendered", in alignment i made it "neutral", and in race i made it "Unknown".
+
+## Wrangling 
+```{r}
+# creating new column
+library(kableExtra)
+full_chrdata %>% mutate(CumStat = Total/6) ->full_chrdata
+full_chrdata%>% relocate(CumStat,.after=Weight)->full_chrdata
+```
+
+I deceded to make a new column that put their cotal stats on the same scale. i did so by taking the their total stat column by the total number of different stats which was 6. i also rearranged the column so that CumStat would appear earlier becuase i will be doing a lot summary stats based on overall stats
+
+```{r}
+# top 10 stongest characters overall?
+full_chrdata %>% select(Name, Alignment, Race, Publisher, CumStat)%>% top_n(10, CumStat) %>%arrange(desc(CumStat))%>%kable()
+```
+
+First i wanted to figure out who were the stringest characters were regardlaess of any group, martian manhunter of DC comic has the highest cummalative stat rating of 96.83333
+
+```{r}
+# which series has better stats on average
+full_chrdata %>% select(-ID, -Height, -Weight,-Total) %>%group_by(Publisher)%>% summarise_if(is.numeric,mean, na.rm=T) %>% arrange(desc(CumStat))%>%kable() 
+```
+
+i was sad to find out that when you compare all characters of DC to Marvel that that DC does have the best average stats of the two but marvel does have higher avergae durability and combat.
+
+```{r}
+# which series has more deviation in their stats
+full_chrdata %>% select(-ID, -Height, -Weight,-Total) %>%group_by(Publisher)%>% summarise_if(is.numeric,sd, na.rm=T) %>%kable()
+```
+
+when looking at the deviation of the two sereis satas dc also seems to have a greater average vairation in the characters total skills, and every solo catagory except for combat 
+
+```{r}
+# which gender has better stats overall 
+full_chrdata %>% select(-ID, -Height, -Weight,-Total) %>%group_by(Gender)%>% summarise_if(is.numeric,mean, na.rm=T) %>% arrange(desc(CumStat))%>%kable()
+```
+
+when you compare the overall stats by gender it seems that males have the best overall, females the second best and non-gendered the worst. this trend is appears to happen in every individual stat catagory as well.
+
+```{r}
+# how many character of each gender are there
+full_chrdata%>% group_by(Gender) %>% summarise(n_distinct(Name)) %>% kable
+```
+
+i wanted to know the gender makeup of all the comic characters and it seems that males domainte the comic universe, with females second and nongendered charaters last 
+
+```{r}
+#which of these three races has better stats overall
+full_chrdata %>% select(-ID, -Height, -Weight, -Total)%>%filter(Race %in% c("Alien","Human","Asgardian")) %>%group_by(Race)%>% summarise_if(is.numeric,mean, na.rm=T) %>% arrange(desc(CumStat))%>% kable()
+```
+
+i wanted to look at some stats via race but there were over 40 races represnted in this data so just choose to do three of my favorites. of these Asgardians have the best stats, aliens have the second best and humans the worst. this trend is the same in all the indivudual sat catagories except power, where aliens have the best power stats 
+
+```{r}
+#which race have highest and lowest stats
+full_chrdata %>% select(-ID, -Height, -Weight,-Total)%>%filter(Race %in% c("Alien","Human","Asgardian")) %>%group_by(Race)%>% summarise_if(is.numeric,max, na.rm=T)%>%kable()
+full_chrdata %>% select(-ID, -Height, -Weight,-Total)%>%filter(Race %in% c("Alien","Human","Asgardian")) %>%group_by(Race)%>% summarise_if(is.numeric,min, na.rm=T)%>%kable()
+```
+
+  i then wanted to see which race had the best and worst of each stat. An Asgardian had the best cummaltive stat, A Human had the best intelligence, allthree races have at least one characteer with strength rating of 100, a human has the highest speed rating, an alien had the highest durabilty rating, all three races had at least one character with a power of 100, and alien and human tied with a rating of 100 for combat.its seem that even though as gardians had the best average stats their are members of different races who have powers that eclipse those of asgardians. there were also rating that went over 100 in durabilty catagory suggesting that some characters have extraordinary surviabilty attributes. humans also had the lowest score in every stat catagory.
+  
+
+```{r}
+# Which univserse and allighnment has the best average stats 
+full_chrdata %>% select(-ID, -Height, -Weight, -Total)%>% filter(Alignment %in% c("neutral", "bad", "good"))  %>%group_by(Publisher, Alignment)%>% summarise_if(is.numeric,mean, na.rm=T)%>% arrange(desc(CumStat))%>%kable()
+```
+
+when grouping by comic series and alignment of the character it seems that neutral marvel characters have the best average cummulative stats, but this trend is not true across all individual stats. DC villians seem to be the most intelligent on average, and Marvel and DC's neutral characters have the same average Combat score.
+
+```{r}
+# Correlation matrix
+cormat <- full_chrdata %>% select(-ID,-Total)%>%select_if(is.numeric) %>% cor(use="pair")
+cormat %>% as.data.frame %>% rownames_to_column("var1")%>% pivot_longer(-1,"var2", values_to="correlation")->cormat
+cormat%>%kable()
+```
+
+when looking at the matrix you can see that there were high correlations intelligence/combat, stength/durabilty, durabilty/power, and intelligence/power. these relationships were not that shocking becuase these attributtes typically go hand in hand. it was also not shocking to see that cummulative stat was highly correlated with every other skilled stat becuase it is a funtion of those stats. height and weight only had moderate correlation for themselves and very low correlations with every other stat. speed only had a modrate correlation with power, and relative low correlations with rest of the stats. but the low correlation with weight can seen as significant becuase that means the lowe weight you are the faster you are.
+
+## Visualizing 
+```{r}
+# Correlation heatmap
+cormat %>% ggplot(aes(var1,var2, fill=correlation)) +geom_tile()+scale_fill_gradient(low = "red", high = "blue")+geom_text(aes(label=round(correlation,2)), color= "black",size=4)+theme(axis.text.x= element_text(angle = 90, hjust = 1))
+```
+
+this correlation heatmap allows you to clearly visualize the correlations between the stats. boxes that are more blue are highly correlated with boxes that are more red are less correlated.
+
+```{r}
+# Strength vs Intelligence by Gender
+full_chrdata%>% ggplot(aes(Intelligence,Strength))+ geom_point(aes(color=Gender))+geom_smooth(aes(color="purple"), method = "lm")+
+facet_wrap(~Gender)+theme_dark()+ggtitle("Strength vs Intelligence by Gender")+theme(legend.position = "none")
+```
+
+When choosing to make some graphs to visualize relationships i chose strength and intelligence becuase i thought it would very interesting two stats relate to each other but alos how they vary across gender. first i mapped my variables intelligence and strength to the x and why coordinate, then i generated a scatter plot and mapped a linear regressing onto the graph and faceted by gender so i could see if the trend differed among them. the scatterplot itslef only really seemed to show a slight positve relationship between intelligence and strength in female and nongendered characters. after adding the linear regression could see that a positive relationship between strength and intelligence can be seen in all genders. this relationship was hard to see in the males with the scatter plot alone becuase it has many extreme outliers.
+
+```{r}
+#Average stats by Publisher and Alignment 
+full_chrdata%>% ggplot(aes(x=Publisher, fill=Alignment))+
+geom_bar(aes(y=CumStat),stat = "summary",fun=mean, position = "dodge")+
+ggtitle("Average stats by Publisher and Alignment")+
+theme_dark()+
+scale_fill_manual(values = c("dark red","green","purple"))+
+scale_y_continuous(n.breaks = 8)
+
+```
+
+the next relationship i wanted to visualize was the overall strength the two universe, good, bad and neutral party characters. i first plotted the publisher to the x axis and had the bars be filled by their alignment, then i made the bar plot so that the x axis would be averagecumulative stats of each catagory with the stat function and i had the postion of the bars as dodge so they would all be side by side for better comparison. when looking at he trends you see the raltionship we talked about earlier: neutral characters have the best and good characters have the worst overall stats regrarless of series. i guess the good guys find a way to win through comradery unlike the bad guys. if only neutral parties could step in help the good guys.
+
+## Dimensionality Reduction
+```{r}
+#Silhouette
+clustdat<- full_chrdata%>%select(Speed,Intelligence,Power,Strength,Combat,Durability)
+library(cluster)
+sil_width<-vector() 
+for(i in 2:10){
+kms <- kmeans(clustdat,centers=i)  
+sil <- silhouette(kms$cluster,dist(clustdat))
+sil_width[i]<-mean(sil[,3])
+} 
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+```
+
+here i used the silhouette method to find my ideal number of clusters for cluster analysis. the ideal number is the one with the highest average width so i chose 2 clusters. before doing this  i created a new variable clustdat that had only numerics that were all on the same scale.
+
+```{r}
+# Pam
+pam1<- clustdat%>% pam(k=2)
+pam1
+pam1$silinfo$avg.width
+pamclust<-clustdat%>%mutate(cluster=as.factor(pam1$clustering))
+library(GGally)
+ggpairs(pamclust, columns = 1:6, aes(color=cluster))
+```
+
+Based on this clustering visualation of these 6 skill stats it seems that cluster two contians characters at low end of every stat catagoty while wjile cluster 1 anre very spread from low to high. cluster one also has a higher correlation between all stat catagory combinations. it seems that cluster one is just comprised of the worst characters statitiscally. these realtionships are not very definative in that cluster one seems to contain more than half of the observations, but this makes since becuase our avreage silhuoutte width of 0.5071214, which based on the cutoffs shows that the structure is weak and possibly artificial.

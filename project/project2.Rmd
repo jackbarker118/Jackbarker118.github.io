@@ -1,0 +1,188 @@
+---
+title: "project 2"
+author: "Jack Barker"
+date: "11/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+## Intoduction 
+I have decided to use my joined dataset of Marvel and DC Comic characters from the last project. The main variables i want focus on in this project are the alignment of the characters(whether they are are good, bad or neutral) publisher (Marvel or DC) and their performance stats; intelligence, strength, speed, durabilty, power, and combat. the perfomance stats are weighted stats ou tof 100 for each character. There are 503 characters in the dataset and i will see if there are any connection btween these stats and their alignment and or publisher. 
+
+
+```{r}
+library(tidyverse)
+chr_stats <- read_csv("~/lab/charcters_stats.csv")
+chr_bio <- read_csv("~/lab/marvel_characters_info.csv")
+chr_bio %>% filter(Publisher %in% c("Marvel Comics", "DC Comics"))->chr_bio
+inner_join(chr_bio, chr_stats, by = "Name")->full_chrdata
+full_chrdata%>% select(-Alignment.y)->full_chrdata
+full_chrdata %>% rename(Alignment= Alignment.x)->full_chrdata
+full_chrdata %>% distinct(Name, .keep_all = T) ->full_chrdata
+full_chrdata$Alignment[full_chrdata$Alignment=="-"]<-"neutral"
+full_chrdata$Gender[full_chrdata$Gender=="-"]<-"Non-gendered"
+full_chrdata$Race[full_chrdata$Race=="-"]<-"Unkown"
+full_chrdata %>% mutate(CumStat = Total/6) ->full_chrdata
+full_chrdata%>% relocate(CumStat,.after=Weight)->full_chrdata
+full_chrdata
+```
+
+## Manova
+
+```{r}
+library(rstatix)
+group <- full_chrdata$Alignment
+DVs <- full_chrdata %>% select(Strength,Speed,Intelligence,Combat,Power,Durability)
+
+#Test multivariate normality for each group (null: assumption met)
+sapply(split(DVs,group), mshapiro_test)
+
+man1<-manova(cbind(Speed,Intelligence,Strength, Durability, Power, Combat)~Alignment, data=full_chrdata) 
+summary(man1)
+summary.aov(man1)
+pairwise.t.test(full_chrdata$Intelligence,full_chrdata$Alignment, p.adj="none")
+pairwise.t.test(full_chrdata$Strength,full_chrdata$Alignment, p.adj="none")
+pairwise.t.test(full_chrdata$Speed,full_chrdata$Alignment, p.adj="none")
+pairwise.t.test(full_chrdata$Durability,full_chrdata$Alignment, p.adj="none")
+pairwise.t.test(full_chrdata$Power,full_chrdata$Alignment, p.adj="none")
+pairwise.t.test(full_chrdata$Combat,full_chrdata$Alignment, p.adj="none")
+```
+
+Here i performed one manova, six anovas and six t-tests making my new bonferroni p-value 0.0038.  i performed a one way manova to see if alignment had an effect on the 6 dependent variables intelligence, strength, speed, durabilty, power, and combat to reveal that a least one of the dependent variables significantly vaired among good, bad and neutral characters. after performing the one-way anovas i found that only Intellingence, Strength, and Durabilty to be siginificant. in the post hoc analysis to see wich alignments differed amonthese three three depedent variables good and bad characters variaed significantly in intelligence and Strength. good characters also varied from netral and bad characters in durabilty. when testing the assumptions of my manova test i reject the null hypothesis of multivariate normality for each group so i violated manova assumptions from the begining.
+
+## Randomization 
+
+```{r}
+#im sorry i just couldnt figure this out 
+```
+
+
+
+##Linear Regression 
+
+```{r}
+library(sandwich);library(lmtest)
+full_chrdata %>% mutate(MCW = full_chrdata$Weight- mean(full_chrdata$Weight)) ->full_chrdata
+fitp<- lm(CumStat~MCW*Alignment, data= full_chrdata)
+residp<-lm(CumStat~MCW*Alignment, data= full_chrdata)$residuals
+fittedp<-lm(CumStat~MCW*Alignment, data= full_chrdata)$fitted.values
+summary(fitp)
+ggplot(full_chrdata, aes(Weight,CumStat, color = Alignment)) + geom_smooth(method = "lm", se = F, fullrange = T)
+ks.test(residp, "pnorm", mean=0, sd(residp))
+bptest(fitp)
+ggplot()+geom_point(aes(fittedp,residp))+geom_hline(yintercept=0, color='red')
+coeftest(fitp,vcov=vcovHC(fitp))
+
+samp_distn<-replicate(5000, {
+boot_dat <- sample_frac(full_chrdata, replace=T) 
+fit <- lm(CumStat~MCW*Alignment, data=boot_dat) 
+coef(fit)
+})
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+```
+
+in my linear egression of to predict cummulative stats from alignment and weight, i decided to mean center my numeric predictors before i ran the model. an intercept coefficient of 44.93346 means that when alignment is bad and MCW is at the mean the Cummaulative stats will be 44.93346 because algined as bad is the reference group . based on the other coeifficients the cummulative stats rise by .05084 when the mean centered weight goes up by one, lower by -5.08863 when alignment is is good, rise by 10.19410 when alignment is neutral, rise by .04991 when mean centered weight goes up by one and alignment is good, and down by .01785 when mean centered weight goes up by one and alignment is nuetral. when checking my assumptions the graph did show somewhat of a pattern and i rejected beth null hypothesis' of the bruech pagan and Kolmogorov-Smirnov test. this means assumptions of linearity normality and homeskedacisty were not met. Then i went on to calulate robust standard errors and bootstrapped standard errors for the model. rerunning the models with robust standard errors and bootstapped statard errors are still about the same, actually slightly lower than the statrdard error but not enough to where i would change the dtermination of the pavlues for thsi regression. the only two significant estimates were tthe intercept(alignment bad and mean cumstat) and MCW. the proportion of the data that can be explained by this model is .1683. 
+
+## Logistic Regression 
+
+```{r}
+library(plotROC)
+full_chrdata1<- full_chrdata[!(full_chrdata$Alignment=="Nuetral"),]
+full_chrdata1%>%mutate(y=ifelse(Alignment=="bad",1,0))->full_chrdata1
+fitp1<- glm(y~Publisher+CumStat, data = full_chrdata1, family = "binomial")
+summary(fitp1)
+exp(coeftest(fitp1))
+full_chrdata1$logss<-predict(fitp1, type = "link")
+full_chrdata1 %>%mutate(Alignment=factor(y,levels = c("0","1"))) %>%ggplot(aes(logss, fill=Alignment))+ geom_density(,alpha=.4)
+probsp<-predict(fitp1, type = "response")
+table(predict=as.numeric(probsp>.5),truth=full_chrdata1$y)%>%addmargins
+ROC<-ggplot(full_chrdata1)+geom_roc(aes(d=y,m=probsp),n.cuts=0)
+ROC
+calc_auc(ROC)
+```
+for my logistic rgression i wanted to see if publisher or cummulative stats could be an accurate predictor of alignment. in order to dummy code alignment into a binary i diecided to remove nutral characters so the binary  would just be 1=bad and 0=good. the regression made dc comic the reference group for the model therefore the interepct estimate of .24163 means a .24163 higher chance of being bad. marvel comics estimate of 1.14483 would mean a 1.14483 higher chance that the character is bad.the cummulative stats estimate of 1.00930 would mean a 1.00930 higher chance of being bad per unit increase in cummulative stats.then i made logit plot to display the overlap, you can clearly see the model doesnt differenciate the two alignments very much. based on the confusion matrix the accuracy of the model is 361/503 or .718, the sensitivity is 361/503 or .718 and the specificity and precision are both 0. looking at the ROC curve you can see there is much area under the curve and the calulated AUC of .572188 is bad. 
+
+
+## Logistic Regression pt2
+
+```{r}
+library(glmnet)
+class_diag<-function(probs,truth){
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+  f1=2*(sens*ppv)/(sens+ppv)
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE){
+    truth<-as.numeric(truth)-1}
+  
+  
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,f1,auc)
+}
+#Model
+fitp2<- glm(y~Publisher+Speed+Intelligence+Power+Durability+Strength+Combat, data = full_chrdata1, family = "binomial")
+summary(fitp2)
+probap<-predict(fitp2,type = "response")
+class_diag(probap,full_chrdata1$y)
+
+# 10 fold
+k=10
+data <- full_chrdata1 %>% sample_frac 
+folds <- ntile(1:nrow(data),n=10)
+
+diags<-NULL
+for(i in 1:k){
+  train <- data[folds!=i,] 
+  test <- data[folds==i,] 
+  truth <- test$y 
+  
+  fit <- glm(y~Publisher+Speed+Intelligence+Power+Durability+Strength+Combat, data=train, family="binomial")
+  probs <- predict(fit, newdata=test, type="response")
+  
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+
+#Lasso
+project_preds<- model.matrix(fitp2)[,-1]
+y<-as.matrix(full_chrdata1$y)
+cv<-cv.glmnet(project_preds,y,family="binomial")
+lasso_fit<-glmnet(project_preds,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso_fit)
+
+#10 Fold 2
+diags<-NULL
+for(i in 1:k){
+  train <- data[folds!=i,] 
+  test <- data[folds==i,] 
+  truth <- test$y 
+  
+  fit <- glm(y~Intelligence, data=train, family="binomial")
+  probs <- predict(fit, newdata=test, type="response")
+  
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+```
+
+When running the larger regression i decided indidual sats that amke up cummulaitve stats instead of all of the varaibles becuase some of the variable in the set are nonsensical like ID#. the in-sample diagnositc for the model showed an accuracy of .726 which is okay, a senistivety of .0634 which is means is does  not classify true bad characters accuratley, a specificty of .98 meaning it does characterise true good characters as good, a precision of .643 which means overall the model prediction okay, and an AUC of .627 meaning the model is bad.after perfoming the 10 fold cross validation out of sample diagnostics revealed a lower accuracy, specificty, and AUC but a alightly higher sensitivety. overall the ten fold cross validation took the model from poor to bad in terms of AUC, but this is expected as model made to predict itself will better than a model used on unseen test data. then i performed a LASSO on the models to see which predictors were most significant in determining alignment. the only predictor that reatined a coeffiecient was Intelligence. perfoming the lasso and only running the regression with Intellingence the accuracy, specificity and AUC rise slightly, while sensity goes down slightly. these slight changes make sense becuase even though intelligence is the only reatained variable its estimate was so low as to almost be insignificant.  

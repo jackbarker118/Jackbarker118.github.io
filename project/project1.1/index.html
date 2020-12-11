@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Jack Barker" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 1: Exploratory Data Analysis</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1.1/">Project 1: Exploratory Data Analysis</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<p>...</p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>I have chosen to explore two datasets containing information on comic book cahracters, specifically Marvel and DC comic characters. I started to think of datasets that could be compatible and Marvel and DC immediately came to mind. I've been a fan of marvel and have had several arguments with friends on which universe is more powerful. Now I can actually find out for myself. I found datasets on forum in kaggle a site were people post their projects for public veiwing and use. I was able to download to different datatets as cvs after creating an account with the site.<br />
+One of the two datasets contains biographical infomation like race, gender, eye color, ect. This dataset this dataset contains characters from outside the Marvel or DC comic univeses so for the purposes of this project I have filtered those out. The second dataset contians the abilty statitistics of DC and Marvel comic characters. These stats include strength, durability, intelligence, speed, power and combat. I plan to explore the relationships between any of these given abilities and biographical information like race or gender. I also plan to explore some of the differences compostion and strength among the two comic universes.</p>
+</div>
+<div id="tidying" class="section level2">
+<h2>Tidying</h2>
+<pre class="r"><code>library(tidyverse)
+chr_stats &lt;- read_csv(&quot;~/lab/charcters_stats.csv&quot;)
+chr_bio &lt;- read_csv(&quot;~/lab/marvel_characters_info.csv&quot;)
+head(chr_bio)</code></pre>
+<pre><code>## # A tibble: 6 x 11
+##      ID Name  Alignment Gender EyeColor Race  HairColor Publisher SkinColor
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;    
+## 1     0 A-Bo… good      Male   yellow   Human No Hair   Marvel C… -        
+## 2     1 Abe … good      Male   blue     Icth… No Hair   Dark Hor… blue     
+## 3     2 Abin… good      Male   blue     Unga… No Hair   DC Comics red      
+## 4     3 Abom… bad       Male   green    Huma… No Hair   Marvel C… -        
+## 5     4 Abra… bad       Male   blue     Cosm… Black     Marvel C… -        
+## 6     5 Abso… bad       Male   blue     Human No Hair   Marvel C… -        
+## # … with 2 more variables: Height &lt;dbl&gt;, Weight &lt;dbl&gt;</code></pre>
+<pre class="r"><code>chrtidy &lt;- chr_bio %&gt;% pivot_longer(c(&quot;Height&quot;, &quot;Weight&quot;))
+head(chrtidy)</code></pre>
+<pre><code>## # A tibble: 6 x 11
+##      ID Name  Alignment Gender EyeColor Race  HairColor Publisher SkinColor
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;    
+## 1     0 A-Bo… good      Male   yellow   Human No Hair   Marvel C… -        
+## 2     0 A-Bo… good      Male   yellow   Human No Hair   Marvel C… -        
+## 3     1 Abe … good      Male   blue     Icth… No Hair   Dark Hor… blue     
+## 4     1 Abe … good      Male   blue     Icth… No Hair   Dark Hor… blue     
+## 5     2 Abin… good      Male   blue     Unga… No Hair   DC Comics red      
+## 6     2 Abin… good      Male   blue     Unga… No Hair   DC Comics red      
+## # … with 2 more variables: name &lt;chr&gt;, value &lt;dbl&gt;</code></pre>
+<pre class="r"><code>chrtidy %&gt;% pivot_wider(names_from = &quot;name&quot;, values_from = &quot;value&quot;)</code></pre>
+<pre><code>## # A tibble: 734 x 11
+##       ID Name  Alignment Gender EyeColor Race  HairColor Publisher SkinColor
+##    &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;    
+##  1     0 A-Bo… good      Male   yellow   Human No Hair   Marvel C… -        
+##  2     1 Abe … good      Male   blue     Icth… No Hair   Dark Hor… blue     
+##  3     2 Abin… good      Male   blue     Unga… No Hair   DC Comics red      
+##  4     3 Abom… bad       Male   green    Huma… No Hair   Marvel C… -        
+##  5     4 Abra… bad       Male   blue     Cosm… Black     Marvel C… -        
+##  6     5 Abso… bad       Male   blue     Human No Hair   Marvel C… -        
+##  7     6 Adam… good      Male   blue     -     Blond     NBC - He… -        
+##  8     7 Adam… good      Male   blue     Human Blond     DC Comics -        
+##  9     8 Agen… good      Female blue     -     Blond     Marvel C… -        
+## 10     9 Agen… good      Male   brown    Human Brown     Marvel C… -        
+## # … with 724 more rows, and 2 more variables: Height &lt;dbl&gt;, Weight &lt;dbl&gt;</code></pre>
+<p>My data was already tidy so in this section here i just untidy it by pivoting heigh and weight longer where each character now had an extra row. then i pivoted them wider to fix it.</p>
+</div>
+<div id="joining" class="section level2">
+<h2>Joining</h2>
+<pre class="r"><code>chr_bio &lt;- chr_bio %&gt;% filter(Publisher %in% c(&quot;Marvel Comics&quot;, 
+    &quot;DC Comics&quot;))
+full_chrdata &lt;- inner_join(chr_bio, chr_stats, by = &quot;Name&quot;)
+full_chrdata &lt;- full_chrdata %&gt;% select(-Alignment.y)
+full_chrdata &lt;- full_chrdata %&gt;% rename(Alignment = Alignment.x)
+full_chrdata &lt;- full_chrdata %&gt;% distinct(Name, .keep_all = T)
+full_chrdata$Alignment[full_chrdata$Alignment == &quot;-&quot;] &lt;- &quot;neutral&quot;
+full_chrdata$Gender[full_chrdata$Gender == &quot;-&quot;] &lt;- &quot;Non-gendered&quot;
+full_chrdata$Race[full_chrdata$Race == &quot;-&quot;] &lt;- &quot;Unkown&quot;
+full_chrdata</code></pre>
+<pre><code>## # A tibble: 503 x 18
+##       ID Name  Alignment Gender EyeColor Race  HairColor Publisher SkinColor
+##    &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;    
+##  1     0 A-Bo… good      Male   yellow   Human No Hair   Marvel C… -        
+##  2     2 Abin… good      Male   blue     Unga… No Hair   DC Comics red      
+##  3     3 Abom… bad       Male   green    Huma… No Hair   Marvel C… -        
+##  4     4 Abra… bad       Male   blue     Cosm… Black     Marvel C… -        
+##  5     7 Adam… good      Male   blue     Human Blond     DC Comics -        
+##  6     9 Agen… good      Male   brown    Human Brown     Marvel C… -        
+##  7    10 Agen… good      Male   -        Unko… -         Marvel C… -        
+##  8    11 Air-… bad       Male   blue     Unko… White     Marvel C… -        
+##  9    13 Alan… good      Male   blue     Unko… Blond     DC Comics -        
+## 10    16 Alfr… good      Male   blue     Human Black     DC Comics -        
+## # … with 493 more rows, and 9 more variables: Height &lt;dbl&gt;, Weight &lt;dbl&gt;,
+## #   Intelligence &lt;dbl&gt;, Strength &lt;dbl&gt;, Speed &lt;dbl&gt;, Durability &lt;dbl&gt;,
+## #   Power &lt;dbl&gt;, Combat &lt;dbl&gt;, Total &lt;dbl&gt;</code></pre>
+<p>Here I performed a filter on the character bio dataset before joining becuase the set contianed characters from star wars, wildstorm, and other variuos comic and i only wanted marvel and dc comic character. then i perfomed an inner join with the stats set so it would also remove all the cases in the stats set that werent marvel or dc. the stats set did not have this distinction in it but by inner joining with the filtered bio set only character from marvel or dc would remain.both datasets also had alignment columns o i deleted one and remaned the other. there were also several duplicate name entries that needed to be removed in order to not skew the data. The datasets also had the ir NAs poses as &quot;-&quot;. where applicable i changed those NAs into a new catagory.Where there was a &quot;-&quot;in gender i made it &quot;Non-gendered&quot;, in alignment i made it &quot;neutral&quot;, and in race i made it &quot;Unknown&quot;.</p>
+</div>
+<div id="wrangling" class="section level2">
+<h2>Wrangling</h2>
+<pre class="r"><code># creating new column
+library(kableExtra)
+full_chrdata &lt;- full_chrdata %&gt;% mutate(CumStat = Total/6)
+full_chrdata &lt;- full_chrdata %&gt;% relocate(CumStat, .after = Weight)</code></pre>
+<p>I deceded to make a new column that put their cotal stats on the same scale. i did so by taking the their total stat column by the total number of different stats which was 6. i also rearranged the column so that CumStat would appear earlier becuase i will be doing a lot summary stats based on overall stats</p>
+<pre class="r"><code># top 10 stongest characters overall?
+full_chrdata %&gt;% select(Name, Alignment, Race, Publisher, CumStat) %&gt;% 
+    top_n(10, CumStat) %&gt;% arrange(desc(CumStat)) %&gt;% kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Name
+</th>
+<th style="text-align:left;">
+Alignment
+</th>
+<th style="text-align:left;">
+Race
+</th>
+<th style="text-align:left;">
+Publisher
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Martian Manhunter
+</td>
+<td style="text-align:left;">
+good
+</td>
+<td style="text-align:left;">
+Martian
+</td>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+96.83333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+General Zod
+</td>
+<td style="text-align:left;">
+bad
+</td>
+<td style="text-align:left;">
+Kryptonian
+</td>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+96.50000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Superboy-Prime
+</td>
+<td style="text-align:left;">
+bad
+</td>
+<td style="text-align:left;">
+Kryptonian
+</td>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+96.50000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Superman
+</td>
+<td style="text-align:left;">
+good
+</td>
+<td style="text-align:left;">
+Kryptonian
+</td>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+96.50000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Amazo
+</td>
+<td style="text-align:left;">
+bad
+</td>
+<td style="text-align:left;">
+Android
+</td>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+95.83333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Stardust
+</td>
+<td style="text-align:left;">
+good
+</td>
+<td style="text-align:left;">
+Unkown
+</td>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:right;">
+94.66667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Galactus
+</td>
+<td style="text-align:left;">
+neutral
+</td>
+<td style="text-align:left;">
+Cosmic Entity
+</td>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:right;">
+92.16667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bizarro
+</td>
+<td style="text-align:left;">
+neutral
+</td>
+<td style="text-align:left;">
+Bizarro
+</td>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+91.66667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dormammu
+</td>
+<td style="text-align:left;">
+bad
+</td>
+<td style="text-align:left;">
+Unkown
+</td>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:right;">
+91.00000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Thor
+</td>
+<td style="text-align:left;">
+good
+</td>
+<td style="text-align:left;">
+Asgardian
+</td>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:right;">
+91.00000
+</td>
+</tr>
+</tbody>
+</table>
+<p>First i wanted to figure out who were the stringest characters were regardlaess of any group, martian manhunter of DC comic has the highest cummalative stat rating of 96.83333</p>
+<pre class="r"><code># which series has better stats on average
+full_chrdata %&gt;% select(-ID, -Height, -Weight, -Total) %&gt;% group_by(Publisher) %&gt;% 
+    summarise_if(is.numeric, mean, na.rm = T) %&gt;% arrange(desc(CumStat)) %&gt;% 
+    kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Publisher
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+<th style="text-align:right;">
+Intelligence
+</th>
+<th style="text-align:right;">
+Strength
+</th>
+<th style="text-align:right;">
+Speed
+</th>
+<th style="text-align:right;">
+Durability
+</th>
+<th style="text-align:right;">
+Power
+</th>
+<th style="text-align:right;">
+Combat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+42.47475
+</td>
+<td style="text-align:right;">
+51.05455
+</td>
+<td style="text-align:right;">
+32.25455
+</td>
+<td style="text-align:right;">
+31.87273
+</td>
+<td style="text-align:right;">
+45.84242
+</td>
+<td style="text-align:right;">
+46.89091
+</td>
+<td style="text-align:right;">
+46.93333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:right;">
+40.64448
+</td>
+<td style="text-align:right;">
+47.32249
+</td>
+<td style="text-align:right;">
+32.19231
+</td>
+<td style="text-align:right;">
+28.83136
+</td>
+<td style="text-align:right;">
+45.85503
+</td>
+<td style="text-align:right;">
+42.48225
+</td>
+<td style="text-align:right;">
+47.18343
+</td>
+</tr>
+</tbody>
+</table>
+<p>i was sad to find out that when you compare all characters of DC to Marvel that that DC does have the best average stats of the two but marvel does have higher avergae durability and combat.</p>
+<pre class="r"><code># which series has more deviation in their stats
+full_chrdata %&gt;% select(-ID, -Height, -Weight, -Total) %&gt;% group_by(Publisher) %&gt;% 
+    summarise_if(is.numeric, sd, na.rm = T) %&gt;% kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Publisher
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+<th style="text-align:right;">
+Intelligence
+</th>
+<th style="text-align:right;">
+Strength
+</th>
+<th style="text-align:right;">
+Speed
+</th>
+<th style="text-align:right;">
+Durability
+</th>
+<th style="text-align:right;">
+Power
+</th>
+<th style="text-align:right;">
+Combat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:right;">
+28.10346
+</td>
+<td style="text-align:right;">
+33.59084
+</td>
+<td style="text-align:right;">
+34.98373
+</td>
+<td style="text-align:right;">
+28.99015
+</td>
+<td style="text-align:right;">
+37.17903
+</td>
+<td style="text-align:right;">
+35.86833
+</td>
+<td style="text-align:right;">
+32.23185
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:right;">
+27.08614
+</td>
+<td style="text-align:right;">
+31.58211
+</td>
+<td style="text-align:right;">
+32.59246
+</td>
+<td style="text-align:right;">
+24.08833
+</td>
+<td style="text-align:right;">
+35.99645
+</td>
+<td style="text-align:right;">
+33.73357
+</td>
+<td style="text-align:right;">
+32.38743
+</td>
+</tr>
+</tbody>
+</table>
+<p>when looking at the deviation of the two sereis satas dc also seems to have a greater average vairation in the characters total skills, and every solo catagory except for combat</p>
+<pre class="r"><code># which gender has better stats overall
+full_chrdata %&gt;% select(-ID, -Height, -Weight, -Total) %&gt;% group_by(Gender) %&gt;% 
+    summarise_if(is.numeric, mean, na.rm = T) %&gt;% arrange(desc(CumStat)) %&gt;% 
+    kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Gender
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+<th style="text-align:right;">
+Intelligence
+</th>
+<th style="text-align:right;">
+Strength
+</th>
+<th style="text-align:right;">
+Speed
+</th>
+<th style="text-align:right;">
+Durability
+</th>
+<th style="text-align:right;">
+Power
+</th>
+<th style="text-align:right;">
+Combat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Male
+</td>
+<td style="text-align:right;">
+44.71124
+</td>
+<td style="text-align:right;">
+51.68895
+</td>
+<td style="text-align:right;">
+35.67151
+</td>
+<td style="text-align:right;">
+32.38372
+</td>
+<td style="text-align:right;">
+50.76453
+</td>
+<td style="text-align:right;">
+47.61628
+</td>
+<td style="text-align:right;">
+50.14244
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female
+</td>
+<td style="text-align:right;">
+35.86375
+</td>
+<td style="text-align:right;">
+44.32847
+</td>
+<td style="text-align:right;">
+25.89051
+</td>
+<td style="text-align:right;">
+25.40876
+</td>
+<td style="text-align:right;">
+36.83212
+</td>
+<td style="text-align:right;">
+39.05839
+</td>
+<td style="text-align:right;">
+43.66423
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non-gendered
+</td>
+<td style="text-align:right;">
+20.55303
+</td>
+<td style="text-align:right;">
+25.68182
+</td>
+<td style="text-align:right;">
+17.50000
+</td>
+<td style="text-align:right;">
+17.40909
+</td>
+<td style="text-align:right;">
+25.18182
+</td>
+<td style="text-align:right;">
+16.59091
+</td>
+<td style="text-align:right;">
+20.95455
+</td>
+</tr>
+</tbody>
+</table>
+<p>when you compare the overall stats by gender it seems that males have the best overall, females the second best and non-gendered the worst. this trend is appears to happen in every individual stat catagory as well.</p>
+<pre class="r"><code># how many character of each gender are there
+full_chrdata %&gt;% group_by(Gender) %&gt;% summarise(n_distinct(Name)) %&gt;% 
+    kable</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Gender
+</th>
+<th style="text-align:right;">
+n_distinct(Name)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female
+</td>
+<td style="text-align:right;">
+137
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male
+</td>
+<td style="text-align:right;">
+344
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non-gendered
+</td>
+<td style="text-align:right;">
+22
+</td>
+</tr>
+</tbody>
+</table>
+<p>i wanted to know the gender makeup of all the comic characters and it seems that males domainte the comic universe, with females second and nongendered charaters last</p>
+<pre class="r"><code># which of these three races has better stats overall
+full_chrdata %&gt;% select(-ID, -Height, -Weight, -Total) %&gt;% filter(Race %in% 
+    c(&quot;Alien&quot;, &quot;Human&quot;, &quot;Asgardian&quot;)) %&gt;% group_by(Race) %&gt;% 
+    summarise_if(is.numeric, mean, na.rm = T) %&gt;% arrange(desc(CumStat)) %&gt;% 
+    kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Race
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+<th style="text-align:right;">
+Intelligence
+</th>
+<th style="text-align:right;">
+Strength
+</th>
+<th style="text-align:right;">
+Speed
+</th>
+<th style="text-align:right;">
+Durability
+</th>
+<th style="text-align:right;">
+Power
+</th>
+<th style="text-align:right;">
+Combat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Asgardian
+</td>
+<td style="text-align:right;">
+71.62500
+</td>
+<td style="text-align:right;">
+70.50000
+</td>
+<td style="text-align:right;">
+74.25000
+</td>
+<td style="text-align:right;">
+58.50000
+</td>
+<td style="text-align:right;">
+80.25000
+</td>
+<td style="text-align:right;">
+76.00000
+</td>
+<td style="text-align:right;">
+70.25000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Alien
+</td>
+<td style="text-align:right;">
+67.03333
+</td>
+<td style="text-align:right;">
+67.80000
+</td>
+<td style="text-align:right;">
+64.00000
+</td>
+<td style="text-align:right;">
+49.00000
+</td>
+<td style="text-align:right;">
+77.00000
+</td>
+<td style="text-align:right;">
+82.20000
+</td>
+<td style="text-align:right;">
+62.20000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Human
+</td>
+<td style="text-align:right;">
+42.05556
+</td>
+<td style="text-align:right;">
+55.68992
+</td>
+<td style="text-align:right;">
+24.63566
+</td>
+<td style="text-align:right;">
+30.70543
+</td>
+<td style="text-align:right;">
+43.18605
+</td>
+<td style="text-align:right;">
+41.62015
+</td>
+<td style="text-align:right;">
+56.49612
+</td>
+</tr>
+</tbody>
+</table>
+<p>i wanted to look at some stats via race but there were over 40 races represnted in this data so just choose to do three of my favorites. of these Asgardians have the best stats, aliens have the second best and humans the worst. this trend is the same in all the indivudual sat catagories except power, where aliens have the best power stats</p>
+<pre class="r"><code># which race have highest and lowest stats
+full_chrdata %&gt;% select(-ID, -Height, -Weight, -Total) %&gt;% filter(Race %in% 
+    c(&quot;Alien&quot;, &quot;Human&quot;, &quot;Asgardian&quot;)) %&gt;% group_by(Race) %&gt;% 
+    summarise_if(is.numeric, max, na.rm = T) %&gt;% kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Race
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+<th style="text-align:right;">
+Intelligence
+</th>
+<th style="text-align:right;">
+Strength
+</th>
+<th style="text-align:right;">
+Speed
+</th>
+<th style="text-align:right;">
+Durability
+</th>
+<th style="text-align:right;">
+Power
+</th>
+<th style="text-align:right;">
+Combat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Alien
+</td>
+<td style="text-align:right;">
+90.83333
+</td>
+<td style="text-align:right;">
+88
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+84
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Asgardian
+</td>
+<td style="text-align:right;">
+91.00000
+</td>
+<td style="text-align:right;">
+88
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+92
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+85
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Human
+</td>
+<td style="text-align:right;">
+89.66667
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+101
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+100
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>full_chrdata %&gt;% select(-ID, -Height, -Weight, -Total) %&gt;% filter(Race %in% 
+    c(&quot;Alien&quot;, &quot;Human&quot;, &quot;Asgardian&quot;)) %&gt;% group_by(Race) %&gt;% 
+    summarise_if(is.numeric, min, na.rm = T) %&gt;% kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Race
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+<th style="text-align:right;">
+Intelligence
+</th>
+<th style="text-align:right;">
+Strength
+</th>
+<th style="text-align:right;">
+Speed
+</th>
+<th style="text-align:right;">
+Durability
+</th>
+<th style="text-align:right;">
+Power
+</th>
+<th style="text-align:right;">
+Combat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Alien
+</td>
+<td style="text-align:right;">
+33.3333333
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+59
+</td>
+<td style="text-align:right;">
+25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Asgardian
+</td>
+<td style="text-align:right;">
+45.5000000
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+52
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Human
+</td>
+<td style="text-align:right;">
+0.8333333
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
+<p>i then wanted to see which race had the best and worst of each stat. An Asgardian had the best cummaltive stat, A Human had the best intelligence, allthree races have at least one characteer with strength rating of 100, a human has the highest speed rating, an alien had the highest durabilty rating, all three races had at least one character with a power of 100, and alien and human tied with a rating of 100 for combat.its seem that even though as gardians had the best average stats their are members of different races who have powers that eclipse those of asgardians. there were also rating that went over 100 in durabilty catagory suggesting that some characters have extraordinary surviabilty attributes. humans also had the lowest score in every stat catagory.</p>
+<pre class="r"><code># Which univserse and allighnment has the best average stats
+full_chrdata %&gt;% select(-ID, -Height, -Weight, -Total) %&gt;% filter(Alignment %in% 
+    c(&quot;neutral&quot;, &quot;bad&quot;, &quot;good&quot;)) %&gt;% group_by(Publisher, Alignment) %&gt;% 
+    summarise_if(is.numeric, mean, na.rm = T) %&gt;% arrange(desc(CumStat)) %&gt;% 
+    kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Publisher
+</th>
+<th style="text-align:left;">
+Alignment
+</th>
+<th style="text-align:right;">
+CumStat
+</th>
+<th style="text-align:right;">
+Intelligence
+</th>
+<th style="text-align:right;">
+Strength
+</th>
+<th style="text-align:right;">
+Speed
+</th>
+<th style="text-align:right;">
+Durability
+</th>
+<th style="text-align:right;">
+Power
+</th>
+<th style="text-align:right;">
+Combat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:left;">
+neutral
+</td>
+<td style="text-align:right;">
+65.94444
+</td>
+<td style="text-align:right;">
+60.44444
+</td>
+<td style="text-align:right;">
+64.44444
+</td>
+<td style="text-align:right;">
+48.66667
+</td>
+<td style="text-align:right;">
+83.55556
+</td>
+<td style="text-align:right;">
+76.11111
+</td>
+<td style="text-align:right;">
+62.44444
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:left;">
+neutral
+</td>
+<td style="text-align:right;">
+51.62963
+</td>
+<td style="text-align:right;">
+60.00000
+</td>
+<td style="text-align:right;">
+38.11111
+</td>
+<td style="text-align:right;">
+38.11111
+</td>
+<td style="text-align:right;">
+60.33333
+</td>
+<td style="text-align:right;">
+50.77778
+</td>
+<td style="text-align:right;">
+62.44444
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:left;">
+bad
+</td>
+<td style="text-align:right;">
+50.61742
+</td>
+<td style="text-align:right;">
+66.81818
+</td>
+<td style="text-align:right;">
+42.11364
+</td>
+<td style="text-align:right;">
+33.86364
+</td>
+<td style="text-align:right;">
+53.86364
+</td>
+<td style="text-align:right;">
+52.47727
+</td>
+<td style="text-align:right;">
+54.56818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:left;">
+bad
+</td>
+<td style="text-align:right;">
+44.02551
+</td>
+<td style="text-align:right;">
+50.65306
+</td>
+<td style="text-align:right;">
+38.09184
+</td>
+<td style="text-align:right;">
+29.97959
+</td>
+<td style="text-align:right;">
+51.58163
+</td>
+<td style="text-align:right;">
+46.42857
+</td>
+<td style="text-align:right;">
+47.41837
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DC Comics
+</td>
+<td style="text-align:left;">
+good
+</td>
+<td style="text-align:right;">
+38.54018
+</td>
+<td style="text-align:right;">
+44.14286
+</td>
+<td style="text-align:right;">
+27.91071
+</td>
+<td style="text-align:right;">
+30.58929
+</td>
+<td style="text-align:right;">
+41.52679
+</td>
+<td style="text-align:right;">
+44.38393
+</td>
+<td style="text-align:right;">
+42.68750
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marvel Comics
+</td>
+<td style="text-align:left;">
+good
+</td>
+<td style="text-align:right;">
+38.22439
+</td>
+<td style="text-align:right;">
+45.39827
+</td>
+<td style="text-align:right;">
+28.43290
+</td>
+<td style="text-align:right;">
+27.57143
+</td>
+<td style="text-align:right;">
+41.95671
+</td>
+<td style="text-align:right;">
+39.49784
+</td>
+<td style="text-align:right;">
+46.48918
+</td>
+</tr>
+</tbody>
+</table>
+<p>when grouping by comic series and alignment of the character it seems that neutral marvel characters have the best average cummulative stats, but this trend is not true across all individual stats. DC villians seem to be the most intelligent on average, and Marvel and DC's neutral characters have the same average Combat score.</p>
+<pre class="r"><code># Correlation matrix
+cormat &lt;- full_chrdata %&gt;% select(-ID, -Total) %&gt;% select_if(is.numeric) %&gt;% 
+    cor(use = &quot;pair&quot;)
+cormat &lt;- cormat %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;% 
+    pivot_longer(-1, &quot;var2&quot;, values_to = &quot;correlation&quot;)
+cormat %&gt;% kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+var1
+</th>
+<th style="text-align:left;">
+var2
+</th>
+<th style="text-align:right;">
+correlation
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.6277353
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.3760874
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.3567110
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.2782732
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.2292612
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.3220637
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.2903738
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.4154456
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.6277353
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.3757983
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.2914632
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.4029848
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.1863433
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.3878277
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.2279776
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.3772350
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.3760874
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.3757983
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.8453725
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.8142718
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.8036489
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.9047656
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.8658931
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.8212382
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.3567110
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.2914632
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.8453725
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.5402949
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.6020591
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.6662061
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.6995420
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.7695660
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.2782732
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.4029848
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.8142718
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.5402949
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.6140767
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.7846165
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.6226808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.5348805
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.2292612
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.1863433
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.8036489
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.6020591
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.6140767
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.6849603
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.6725660
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.5682190
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.3220637
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.3878277
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.9047656
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.6662061
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.7846165
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.6849603
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.7472129
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.6603252
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.2903738
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.2279776
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.8658931
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.6995420
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.6226808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.6725660
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.7472129
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+0.6209504
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Height
+</td>
+<td style="text-align:right;">
+0.4154456
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Weight
+</td>
+<td style="text-align:right;">
+0.3772350
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+CumStat
+</td>
+<td style="text-align:right;">
+0.8212382
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Intelligence
+</td>
+<td style="text-align:right;">
+0.7695660
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Strength
+</td>
+<td style="text-align:right;">
+0.5348805
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Speed
+</td>
+<td style="text-align:right;">
+0.5682190
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Durability
+</td>
+<td style="text-align:right;">
+0.6603252
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Power
+</td>
+<td style="text-align:right;">
+0.6209504
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:left;">
+Combat
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<p>when looking at the matrix you can see that there were high correlations intelligence/combat, stength/durabilty, durabilty/power, and intelligence/power. these relationships were not that shocking becuase these attributtes typically go hand in hand. it was also not shocking to see that cummulative stat was highly correlated with every other skilled stat becuase it is a funtion of those stats. height and weight only had moderate correlation for themselves and very low correlations with every other stat. speed only had a modrate correlation with power, and relative low correlations with rest of the stats. but the low correlation with weight can seen as significant becuase that means the lowe weight you are the faster you are.</p>
+</div>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
+<pre class="r"><code># Correlation heatmap
+cormat %&gt;% ggplot(aes(var1, var2, fill = correlation)) + geom_tile() + 
+    scale_fill_gradient(low = &quot;red&quot;, high = &quot;blue&quot;) + geom_text(aes(label = round(correlation, 
+    2)), color = &quot;black&quot;, size = 4) + theme(axis.text.x = element_text(angle = 90, 
+    hjust = 1))</code></pre>
+<p><img src="../../project/Project1.1_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>this correlation heatmap allows you to clearly visualize the correlations between the stats. boxes that are more blue are highly correlated with boxes that are more red are less correlated.</p>
+<pre class="r"><code># Strength vs Intelligence by Gender
+full_chrdata %&gt;% ggplot(aes(Intelligence, Strength)) + geom_point(aes(color = Gender)) + 
+    geom_smooth(aes(color = &quot;purple&quot;), method = &quot;lm&quot;) + facet_wrap(~Gender) + 
+    theme_dark() + ggtitle(&quot;Strength vs Intelligence by Gender&quot;) + 
+    theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="../../project/Project1.1_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>When choosing to make some graphs to visualize relationships i chose strength and intelligence becuase i thought it would very interesting two stats relate to each other but alos how they vary across gender. first i mapped my variables intelligence and strength to the x and why coordinate, then i generated a scatter plot and mapped a linear regressing onto the graph and faceted by gender so i could see if the trend differed among them. the scatterplot itslef only really seemed to show a slight positve relationship between intelligence and strength in female and nongendered characters. after adding the linear regression could see that a positive relationship between strength and intelligence can be seen in all genders. this relationship was hard to see in the males with the scatter plot alone becuase it has many extreme outliers.</p>
+<pre class="r"><code># Average stats by Publisher and Alignment
+full_chrdata %&gt;% ggplot(aes(x = Publisher, fill = Alignment)) + 
+    geom_bar(aes(y = CumStat), stat = &quot;summary&quot;, fun = mean, 
+        position = &quot;dodge&quot;) + ggtitle(&quot;Average stats by Publisher and Alignment&quot;) + 
+    theme_dark() + scale_fill_manual(values = c(&quot;dark red&quot;, &quot;green&quot;, 
+    &quot;purple&quot;)) + scale_y_continuous(n.breaks = 8)</code></pre>
+<p><img src="../../project/Project1.1_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>the next relationship i wanted to visualize was the overall strength the two universe, good, bad and neutral party characters. i first plotted the publisher to the x axis and had the bars be filled by their alignment, then i made the bar plot so that the x axis would be averagecumulative stats of each catagory with the stat function and i had the postion of the bars as dodge so they would all be side by side for better comparison. when looking at he trends you see the raltionship we talked about earlier: neutral characters have the best and good characters have the worst overall stats regrarless of series. i guess the good guys find a way to win through comradery unlike the bad guys. if only neutral parties could step in help the good guys.</p>
+</div>
+<div id="dimensionality-reduction" class="section level2">
+<h2>Dimensionality Reduction</h2>
+<pre class="r"><code># Silhouette
+clustdat &lt;- full_chrdata %&gt;% select(Speed, Intelligence, Power, 
+    Strength, Combat, Durability)
+library(cluster)
+sil_width &lt;- vector()
+for (i in 2:10) {
+    kms &lt;- kmeans(clustdat, centers = i)
+    sil &lt;- silhouette(kms$cluster, dist(clustdat))
+    sil_width[i] &lt;- mean(sil[, 3])
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../../project/Project1.1_files/figure-html/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>here i used the silhouette method to find my ideal number of clusters for cluster analysis. the ideal number is the one with the highest average width so i chose 2 clusters. before doing this i created a new variable clustdat that had only numerics that were all on the same scale.</p>
+<pre class="r"><code># Pam
+pam1 &lt;- clustdat %&gt;% pam(k = 2)
+pam1</code></pre>
+<pre><code>## Medoids:
+##       ID Speed Intelligence Power Strength Combat Durability
+## [1,]  23    42           63    76       44     60         75
+## [2,] 498     1            1     0        1      1          1
+## Clustering vector:
+##   [1] 1 1 1 1 2 2 1 1 1 2 1 2 1 1 1 1 1 1 1 1 1 2 1 1 2 1 1 1 1 1 2 1 2 2 2 2 2
+##  [38] 1 1 1 2 1 1 1 2 1 2 1 1 1 1 2 1 1 2 2 1 1 1 1 2 2 2 2 1 1 2 1 1 1 2 1 1 1
+##  [75] 1 1 2 1 1 1 1 2 1 1 2 1 1 1 1 2 2 2 1 2 2 1 2 2 1 1
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 403 entries ]
+## Objective function:
+##    build     swap 
+## 53.44011 48.03787 
+## 
+## Available components:
+##  [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+##  [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;       &quot;data&quot;</code></pre>
+<pre class="r"><code>pam1$silinfo$avg.width</code></pre>
+<pre><code>## [1] 0.5071214</code></pre>
+<pre class="r"><code>pamclust &lt;- clustdat %&gt;% mutate(cluster = as.factor(pam1$clustering))
+library(GGally)
+ggpairs(pamclust, columns = 1:6, aes(color = cluster))</code></pre>
+<p><img src="../../project/Project1.1_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Based on this clustering visualation of these 6 skill stats it seems that cluster two contians characters at low end of every stat catagoty while wjile cluster 1 anre very spread from low to high. cluster one also has a higher correlation between all stat catagory combinations. it seems that cluster one is just comprised of the worst characters statitiscally. these realtionships are not very definative in that cluster one seems to contain more than half of the observations, but this makes since becuase our avreage silhuoutte width of 0.5071214, which based on the cutoffs shows that the structure is weak and possibly artificial.</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
