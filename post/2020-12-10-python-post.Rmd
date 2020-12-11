@@ -8,7 +8,7 @@ tags: []
 description: ''
 ---
 ![](/post/2020-12-10-python-post_files/imagedna.jpeg)
-## In python we were able to create a function that can scan dna stands to find how many times each three ltter base code shows up in the sequence and tell you
+## In python we were able to create a function that can scan dna stands to find how many times each three ltter base code shows up in the sequence and spit them out for you
 
 ```{python}
 import re
