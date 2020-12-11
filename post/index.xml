@@ -17,16 +17,5 @@
 import re my_seq1 = &amp;quot;ATCATCATG&amp;quot; my_seq2 = &amp;quot;CAGCCCAATCAGGCTCTACTGCCACTAAACTTACGCAGGATATATTTACGCCGACGTACT&amp;quot; # Your code goes here def count_mers(my_seq1): mers=re.findall(r&amp;#39;[ATGC][ATGC][ATGC]&amp;#39;,my_seq1) counts={} for c in mers: if c in counts: counts[c]+=1 else: counts[c]=1 for c in counts: print(c, &amp;quot;appears&amp;quot;, counts[c],&amp;quot;times&amp;quot;) count_mers(my_seq1) ## ATC appears 2 times ## ATG appears 1 times count_mers(my_seq2) ## CAG appears 2 times ## CCC appears 1 times ## AAT appears 1 times ## GCT appears 1 times ## CTA appears 2 times ## CTG appears 1 times ## CCA appears 1 times ## AAC appears 1 times ## TTA appears 2 times ## CGC appears 2 times ## AGG appears 1 times ## ATA appears 1 times ## TAT appears 1 times ## CGA appears 1 times ## CGT appears 1 times ## ACT appears 1 times </description>
     </item>
     
-    <item>
-      <title>Hello R Markdown</title>
-      <link>/post/2015/07/23/hello-r-markdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
-      
-      <guid>/post/2015/07/23/hello-r-markdown/</guid>
-      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
-    </item>
-    
   </channel>
 </rss>

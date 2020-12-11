@@ -2,10 +2,10 @@
 title: 'Python post '
 author: ''
 date: '2020-12-10'
-slug: python-post
-categories: []
-tags: []
 description: ''
+slug: python-post
+tags: []
+categories: []
 ---
 ![](/post/2020-12-10-python-post_files/imagedna.jpeg)
 ## In python we were able to create a function that can scan dna stands to find how many times each three ltter base code shows up in the sequence and spit them out for you
